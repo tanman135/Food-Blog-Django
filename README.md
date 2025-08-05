@@ -21,26 +21,6 @@ A simple yet functional web application built using Django, allowing staff users
 
 ---
 
-## 📁 Project Structure
-
-my_blog/
-├── food/
-│   ├── migrations/
-│   ├── static/food/images/
-│   ├── templates/food/
-│   ├── admin.py
-│   ├── models.py
-│   ├── views.py
-│   ├── forms.py
-│   └── urls.py
-├── my_blog/
-│   ├── settings.py
-│   └── urls.py
-├── manage.py
-└── requirements.txt
-
----
-
 ## 🚀 Getting Started
 
 ### 1. Clone the repository
