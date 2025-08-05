@@ -1,0 +1,24 @@
+{% extends 'food/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Add Comment{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-4" style="font-family: 'Playfair Display', serif; color: #f57c00;">Add a Comment</h3>
+
+  <form method="post" class="bg-white p-4 rounded shadow-sm border" style="max-width: 600px;">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+      <label for="id_text" class="form-label">Your Comment</label>
+      {% render_field form.text class="form-control" rows="4" placeholder="Write your thoughts here..." %}
+      {% if form.text.errors %}
+        <div class="text-danger mt-1">{{ form.text.errors }}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-warning">Submit Comment</button>
+  </form>
+</div>
+{% endblock %}

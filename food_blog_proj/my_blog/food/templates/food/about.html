@@ -1,0 +1,23 @@
+{% extends 'food/base.html' %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4" style="font-family: 'Playfair Display', serif; color: #f57c00;">About This Blog</h2>
+  <p class="lead" style="max-width: 700px;">
+    Welcome to our Food Blog! Here, we share delicious recipes, cooking tips, and inspiring culinary stories.  
+    Our mission is to make cooking fun, easy, and accessible to everyone.
+  </p>
+
+  <h4 class="mt-5" style="font-family: 'Playfair Display', serif; color: #f57c00;">About the Creator</h4>
+  <div class="d-flex align-items-center mt-3">
+    <img src="{% static 'food/images/creator.jpg' %}" alt="Creator" class="rounded-circle me-3" style="width: 100px; height: 100px; object-fit: cover;">
+    <div>
+      <p>Hello! I'm Isha, a passionate home cook and food lover. I started this blog to share my favorite recipes and cooking adventures with you.</p>
+      <p>Hope you enjoy the recipes and get inspired to cook something amazing!</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

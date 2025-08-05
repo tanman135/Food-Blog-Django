@@ -1,0 +1,63 @@
+{% extends 'food/base.html' %}
+
+{% block title %}{{ category.name }} Recipes - Food Blog{% endblock %}
+
+{% block content %}
+<h2 class="mb-4" style="font-family: 'Playfair Display', serif; color: #f57c00;">
+  {{ category.name }} Recipes
+</h2>
+
+<div class="row g-4">
+  {% for recipe in recipes %}
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <a href="{% url 'recipe_detail' recipe.pk %}">
+        <img src="{{ recipe.image.url }}" class="card-img-top" alt="{{ recipe.title }}">
+      </a>
+      <div class="card-body">
+        <h5 class="card-title" style="font-family: 'Playfair Display', serif;">
+          <a href="{% url 'recipe_detail' recipe.pk %}" class="text-decoration-none text-dark">{{ recipe.title }}</a>
+        </h5>
+        <p class="card-text text-muted" style="font-size: 0.9rem;">
+          {{ recipe.description|truncatewords:15 }}
+        </p>
+        <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-sm btn-outline-warning">View</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p>No recipes found under this category.</p>
+  {% endfor %}
+</div>
+
+<!-- ✅ Pagination Controls -->
+{% if recipes.has_other_pages %}
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if recipes.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ recipes.previous_page_number }}" aria-label="Previous">&laquo;</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+    {% endif %}
+
+    {% for page_num in recipes.paginator.page_range %}
+      {% if recipes.number == page_num %}
+        <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+      {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
+      {% endif %}
+    {% endfor %}
+
+    {% if recipes.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ recipes.next_page_number }}" aria-label="Next">&raquo;</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

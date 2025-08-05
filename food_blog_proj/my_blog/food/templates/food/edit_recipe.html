@@ -1,0 +1,64 @@
+{% extends 'food/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Edit Recipe{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 class="mb-4" style="font-family: 'Playfair Display', serif; color: #f57c00;">Edit Recipe</h2>
+
+  <form method="post" enctype="multipart/form-data" class="bg-white p-4 rounded shadow-sm border">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Title</label>
+      {% render_field form.title class="form-control" %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Short Description</label>
+      {% render_field form.description class="form-control" rows="2" %}
+    </div>
+
+
+    <div class="mb-3">
+      <label class="form-label">Prep Time (minutes)</label>
+      {% render_field form.prep_time class="form-control" %}
+    </div>
+
+
+    <div class="mb-3">
+      <label class="form-label">Servings</label>
+      {% render_field form.servings class="form-control" placeholder="e.g. 4" %}
+    </div>
+
+
+    <div class="mb-3">
+      <label class="form-label">Ingredients</label>
+      {% render_field form.ingredients class="form-control" rows="4" %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Instructions</label>
+      {% render_field form.instructions class="form-control" rows="6" %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Category</label>
+      {% render_field form.category class="form-select" %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Video Link (YouTube or other)</label>
+      {% render_field form.video_link class="form-control" %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Final Product Image</label>
+      {% render_field form.image class="form-control" %}
+    </div>
+
+    <button type="submit" class="btn btn-warning">Update Recipe</button>
+  </form>
+</div>
+{% endblock %}

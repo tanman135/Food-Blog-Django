@@ -1,0 +1,192 @@
+{% extends 'food/base.html' %}
+
+{% block title %}{{ recipe.title }} - Recipe{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+
+    <div class="print-area">
+      <h2 style="font-family: 'Playfair Display', serif; color: #f57c00;">{{ recipe.title }}</h2>
+      <p class="text-muted">By {{ recipe.author }} | {{ recipe.created_at|date:"F j, Y" }}</p>
+    </div>
+
+    <!-- Like Button -->
+    <div class="mb-3">
+      <form action="{% url 'toggle_like' recipe.id %}" method="post" style="display:block;">
+        {% csrf_token %}
+        {% if user.is_authenticated %}
+          {% if user in recipe.likes.all %}
+            <button type="submit" class="btn btn-danger btn-sm">❤️ Unlike</button>
+          {% else %}
+            <button type="submit" class="btn btn-outline-danger btn-sm">🤍 Like</button>
+          {% endif %}
+          <span class="ms-2">{{ recipe.likes.count }} like{{ recipe.likes.count|pluralize }}</span>
+        {% else %}
+          <p><a class="btn btn-sm btn-outline-primary me-2" href="{% url 'login' %}">Log in</a> to like this recipe.</p>
+        {% endif %}
+      </form>
+    </div>
+
+    <div class="print-area">
+      <!-- Final Product Image -->
+      {% if recipe.image %}
+        <div class="ratio ratio-16x9 mb-3 bg-light d-flex align-items-center justify-content-center">
+          <img src="{{ recipe.image.url }}" class="w-100 h-100 rounded" style="object-fit: cover;" alt="{{ recipe.title }}">
+        </div>
+      {% else %}
+        <div class="ratio ratio-16x9 mb-3 bg-light d-flex align-items-center justify-content-center text-muted">
+          <p>No image uploaded yet.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <button onclick="window.print()" class="btn btn-warning mb-3">
+      <i class="bi bi-printer"></i> Print Recipe
+    </button>
+
+    <div class="print-area">
+      {% if recipe.prep_time or recipe.servings %}
+        <p class="mt-2">
+          {% if recipe.prep_time %}<strong>Prep Time:</strong> {{ recipe.prep_time }} mins{% endif %}
+          {% if recipe.servings %}<br><strong>Servings:</strong> {{ recipe.servings }}{% endif %}
+        </p>
+      {% endif %}
+
+      <!-- Ingredients -->
+      <h4 style="color: #e65100;">Ingredients</h4>
+      <p>{{ recipe.ingredients|linebreaks }}</p>
+
+      <!-- Instructions -->
+      <h4 style="color: #e65100;">Instructions</h4>
+      <p>{{ recipe.instructions|linebreaks }}</p>
+
+      <!-- Category -->
+      <p class="mt-3"><strong>Category:</strong> {{ recipe.category.name }}</p>
+    </div>
+
+    <!-- Recipe Video -->
+    {% if recipe.video_link %}
+      <div class="ratio ratio-16x9 mb-4">
+        {% if "youtube.com/watch?v=" in recipe.video_link %}
+          {% with video_id=recipe.video_link|cut:"https://www.youtube.com/watch?v=" %}
+            <iframe src="https://www.youtube.com/embed/{{ video_id|cut:"&"|urlencode }}" allowfullscreen></iframe>
+          {% endwith %}
+        {% elif "youtu.be/" in recipe.video_link %}
+          {% with video_id=recipe.video_link|cut:"https://youtu.be/" %}
+            <iframe src="https://www.youtube.com/embed/{{ video_id|cut:"&"|urlencode }}" allowfullscreen></iframe>
+          {% endwith %}
+        {% elif "youtube.com/shorts/" in recipe.video_link %}
+          {% with video_id=recipe.video_link|cut:"https://www.youtube.com/shorts/" %}
+            <iframe src="https://www.youtube.com/embed/{{ video_id|cut:"?"|urlencode }}" allowfullscreen></iframe>
+          {% endwith %}
+        {% else %}
+          <iframe src="{{ recipe.video_link }}" allowfullscreen></iframe>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- Edit/Delete for Admin -->
+    {% if user.is_authenticated and user.is_staff and recipe.author == user %}
+      <div class="mb-3">
+        <a href="{% url 'edit_recipe' recipe.pk %}" class="btn btn-sm btn-outline-primary me-2">✏️ Edit</a>
+        <a href="{% url 'delete_recipe' recipe.pk %}" class="btn btn-sm btn-outline-danger"
+           onclick="return confirm('Are you sure you want to delete this recipe?');">🗑️ Delete</a>
+      </div>
+    {% endif %}
+
+    <!-- Display average rating -->
+    <p><strong>Average Rating:</strong> {{ average_rating }} / 5</p>
+    <div>
+      {% for _ in full_stars %}
+        <i class="bi bi-star-fill text-warning"></i>
+      {% endfor %}
+      {% if half_star %}
+        <i class="bi bi-star-half text-warning"></i>
+      {% endif %}
+      {% for _ in empty_stars %}
+        <i class="bi bi-star text-warning"></i>
+      {% endfor %}
+    </div>
+
+    <!-- Rating form -->
+    {% if user.is_authenticated %}
+      {% if not user_has_rated %}
+        <form method="post" action="{% url 'rate_recipe' recipe.pk %}" class="mb-4">
+          {% csrf_token %}
+          <label for="rating" class="form-label"><strong>Rate this recipe:</strong></label>
+          <select name="rating" id="rating" class="form-select w-auto d-inline-block">
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Fair</option>
+            <option value="3">3 - Good</option>
+            <option value="4">4 - Very Good</option>
+            <option value="5">5 - Excellent</option>
+          </select>
+          <button type="submit" class="btn btn-sm btn-outline-warning ms-2">Submit Rating</button>
+        </form>
+      {% else %}
+        <p class="text-muted">You have already rated this recipe.</p>
+      {% endif %}
+    {% else %}
+      <p><a href="{% url 'login' %}">Login</a> to rate this recipe.</p>
+    {% endif %}
+
+    <hr>
+
+    <!-- Comments Section -->
+    <h5 class="mt-4" style="color: #f57c00;">Comments</h5>
+
+    {% for comment in comments %}
+      {% if not comment.rejected or user.is_staff %}
+        <div class="border rounded p-3 mb-3 bg-light">
+          <p class="mb-1">
+            <strong>{{ comment.user.username }}</strong>
+            {% if comment.rejected %}
+              <span class="badge bg-danger ms-2">Rejected (Visible only to Admin)</span>
+            {% elif comment.approved %}
+              <span class="badge bg-success ms-2">Approved</span>
+            {% endif %}
+            said on {{ comment.created_at|date:"M d, Y" }}:
+          </p>
+          <p>{{ comment.text }}</p>
+
+          {% if user.is_staff %}
+            <div class="mt-2">
+              {% if not comment.approved %}
+                <form method="post" action="{% url 'approve_comment' comment.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-success me-1">Approve</button>
+                </form>
+              {% endif %}
+              {% if not comment.rejected %}
+                <form method="post" action="{% url 'reject_comment' comment.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-secondary me-1">Reject</button>
+                </form>
+              {% endif %}
+              <form method="post" action="{% url 'delete_comment' comment.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% empty %}
+      <p>No comments yet. Be the first to comment!</p>
+    {% endfor %}
+
+    <!-- Comment Form -->
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'add_comment' recipe.pk %}" class="mt-4 bg-white p-3 rounded shadow-sm border">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-warning">Post Comment</button>
+      </form>
+    {% else %}
+      <p><a class="btn btn-sm btn-outline-primary me-2" href="{% url 'login' %}">Login</a> to comment on this recipe.</p>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

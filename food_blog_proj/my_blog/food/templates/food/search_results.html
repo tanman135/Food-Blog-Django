@@ -1,0 +1,99 @@
+{% extends 'food/base.html' %}
+{% load static %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4" style="font-family: 'Playfair Display', serif; color: #f57c00;">
+    Search Results for "{{ query }}"
+  </h2>
+
+  <!-- 🔍 Filter Bar -->
+  <form method="get" class="row g-3 align-items-end mb-4">
+    <input type="hidden" name="q" value="{{ query }}">
+    
+    <div class="col-md-3">
+      <label for="min_rating" class="form-label">Min Rating</label>
+      <select name="min_rating" id="min_rating" class="form-select">
+        <option value="">Any</option>
+        {% for i in "12345" %}
+          <option value="{{ i }}" {% if min_rating == i %}selected{% endif %}>{{ i }}+</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label for="max_prep_time" class="form-label">Max Prep Time (mins)</label>
+      <input type="number" name="max_prep_time" id="max_prep_time" class="form-control"
+             value="{{ max_prep_time }}">
+    </div>
+
+    <div class="col-auto">
+      <button type="submit" class="btn btn-warning">Apply Filters</button>
+    </div>
+  </form>
+
+  {% if recipes %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+      {% for recipe in recipes %}
+        <div class="col">
+          <div class="card h-100 shadow-sm border-0">
+            <a href="{% url 'recipe_detail' recipe.pk %}">
+              {% if recipe.image %}
+                <img src="{{ recipe.image.url }}" class="card-img-top" alt="{{ recipe.title }}">
+              {% else %}
+                <img src="{% static 'food/images/default_recipe.jpg' %}" class="card-img-top" alt="Default Image">
+              {% endif %}
+            </a>
+            <div class="card-body">
+              <h5 class="card-title" style="color: #f57c00;">{{ recipe.title }}</h5>
+              <p class="card-text text-truncate">{{ recipe.description }}</p>
+              <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-outline-warning btn-sm">View Recipe</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- ✅ Pagination Controls -->
+    {% if recipes.has_other_pages %}
+      <nav class="mt-4" aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+          {% if recipes.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?q={{ query }}&min_rating={{ min_rating }}&max_prep_time={{ max_prep_time }}&page={{ recipes.previous_page_number }}">&laquo;</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+          {% endif %}
+
+          {% for num in recipes.paginator.page_range %}
+            {% if recipes.number == num %}
+              <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% else %}
+              <li class="page-item">
+                <a class="page-link" href="?q={{ query }}&min_rating={{ min_rating }}&max_prep_time={{ max_prep_time }}&page={{ num }}">{{ num }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+
+          {% if recipes.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?q={{ query }}&min_rating={{ min_rating }}&max_prep_time={{ max_prep_time }}&page={{ recipes.next_page_number }}">&raquo;</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <p class="lead">No recipes found matching your search.</p>
+  {% endif %}
+
+
+
+</div>
+{% endblock %}

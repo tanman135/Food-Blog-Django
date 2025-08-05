@@ -1,0 +1,71 @@
+{% extends 'food/base.html' %}
+{% load static %}
+
+{% block title %}Recipes - Food Blog{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4" style="font-family: 'Playfair Display', serif; color: #f57c00;">Recipes</h2>
+
+  <!-- 🔥 Recipe Cards -->
+  <div class="row g-4">
+    {% for recipe in recipes %}
+      <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+          <a href="{% url 'recipe_detail' recipe.pk %}">
+            {% if recipe.image %}
+              <img src="{{ recipe.image.url }}" class="card-img-top" alt="{{ recipe.title }}">
+            {% else %}
+              <img src="{% static 'food/images/default_image.png' %}" class="card-img-top" alt="Default Recipe Image">
+            {% endif %}
+          </a>
+          <div class="card-body d-flex flex-column justify-content-between">
+            <div>
+              <h5 class="card-title" style="font-family: 'Playfair Display', serif;">
+                <a href="{% url 'recipe_detail' recipe.pk %}" class="text-decoration-none text-dark">{{ recipe.title }}</a>
+              </h5>
+              <p class="card-text text-muted" style="font-size: 0.9rem;">
+                {{ recipe.description|truncatewords:15 }}
+              </p>
+            </div>
+            <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-sm btn-outline-warning mt-2">View</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No recipes found.</p>
+    {% endfor %}
+  </div>
+
+  <!-- ✅ Pagination Controls -->
+  {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-5">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">&laquo;</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+
+        {% for page_num in page_obj.paginator.page_range %}
+          {% if page_obj.number == page_num %}
+            <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">&raquo;</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'food/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Add New Recipe{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 class="mb-4" style="font-family: 'Playfair Display', serif; color: #f57c00;">Post a New Recipe</h2>
+
+  <form id="recipeForm" method="post" enctype="multipart/form-data" class="bg-white p-4 rounded shadow-sm border">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <input type="hidden" id="recipeId" name="id" value="{{ draft_id }}">
+
+    <div id="draftSavedMsg" style="display:none; color:green; margin-top:10px;">Draft auto-saved ✔</div>
+
+    <div class="mb-3">
+      <label class="form-label">Title</label>
+      {% render_field form.title class="form-control" %}
+      {{ form.title.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Short Description</label>
+      {% render_field form.description class="form-control" rows="2" %}
+      {{ form.description.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Prep Time (minutes)</label>
+      {% render_field form.prep_time class="form-control" %}
+      {{ form.prep_time.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Servings</label>
+      {% render_field form.servings class="form-control" %}
+      {{ form.servings.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Ingredients</label>
+      {% render_field form.ingredients class="form-control" rows="4" %}
+      {{ form.ingredients.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Instructions</label>
+      {% render_field form.instructions class="form-control" rows="6" %}
+      {{ form.instructions.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Category</label>
+      {% render_field form.category class="form-select" %}
+      {{ form.category.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Video Link (YouTube or other)</label>
+      {% render_field form.video_link class="form-control" %}
+      {{ form.video_link.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Final Product Image</label>
+      {% render_field form.image class="form-control" %}
+      {{ form.image.errors }}
+    </div>
+
+    <button type="submit" name="save_action" value="publish" class="btn btn-success">Publish</button>
+    <button type="submit" name="save_action" value="draft" class="btn btn-secondary">Save as Draft</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const form = document.getElementById("recipeForm");
+
+  function autoSave() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const id = document.getElementById('recipeId').value;
+    const formData = new URLSearchParams({
+      id: id,
+      title: form.title.value,
+      description: form.description.value,
+      prep_time: form.prep_time.value,
+      servings: form.servings.value,
+      ingredients: form.ingredients.value,
+      instructions: form.instructions.value,
+      category: form.category.value,
+      video_link: form.video_link.value,
+    });
+
+    fetch("{% url 'autosave_recipe' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrfToken,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: formData,
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.id) {
+        document.getElementById('recipeId').value = data.id;
+        const msg = document.getElementById('draftSavedMsg');
+        msg.style.display = 'block';
+        setTimeout(() => { msg.style.display = 'none'; }, 2000);
+      }
+    });
+  }
+
+  setInterval(autoSave, 5000);
+</script>
+{% endblock %}

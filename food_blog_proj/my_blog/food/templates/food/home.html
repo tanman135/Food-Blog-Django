@@ -1,0 +1,54 @@
+{% extends 'food/base.html' %}
+{% load static %}
+
+{% block title %}Home - Food Blog{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <!-- Main Content: Featured Recipes -->
+    <div class="col-lg-8 mb-4">
+      <h2 class="mb-4" style="font-family: 'Playfair Display', serif; color: #f57c00;">Featured Recipes</h2>
+      <div class="row g-4">
+        {% for recipe in recipes %}
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <a href="{% url 'recipe_detail' recipe.pk %}">
+              {% if recipe.image %}
+                <img src="{{ recipe.image.url }}" class="card-img-top" alt="{{ recipe.title }}">
+              {% else %}
+                <img src="{% static 'food/images/default_image.png' %}" class="card-img-top" alt="Default Recipe Image">
+              {% endif %}
+            </a>
+            <div class="card-body d-flex flex-column justify-content-between">
+              <div>
+                <h5 class="card-title" style="font-family: 'Playfair Display', serif; color: #e65100;">
+                  <a href="{% url 'recipe_detail' recipe.pk %}" class="text-decoration-none text-dark">{{ recipe.title }}</a>
+                </h5>
+                <p class="card-text text-muted" style="font-size: 0.9rem;">
+                  {{ recipe.description|truncatewords:20 }}
+                </p>
+              </div>
+              <div class="mt-2">
+                <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-sm btn-warning">View Recipe</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p>No recipes found.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Sidebar: Creator Info -->
+    <div class="col-lg-4">
+      <aside class="sidebar p-4 mb-4 bg-white rounded shadow-sm">
+        <h3 style="font-family: 'Playfair Display', serif; color: #f57c00;">About the Creator</h3>
+        <img src="{% static 'food/images/creator.jpg' %}" alt="Creator" class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
+        <p>Hello! I'm Isha Mangaonkar, passionate about sharing delicious recipes and cooking tips. Stay tuned for fresh recipes every week!</p>
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}
